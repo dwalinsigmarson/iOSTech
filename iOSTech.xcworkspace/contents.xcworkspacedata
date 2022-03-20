@@ -5,6 +5,9 @@
       location = "group:CombineTableView/CombineTableView.xcodeproj">
    </FileRef>
    <FileRef
+      location = "group:MoreCombine">
+   </FileRef>
+   <FileRef
       location = "group:DataServer">
    </FileRef>
 </Workspace>

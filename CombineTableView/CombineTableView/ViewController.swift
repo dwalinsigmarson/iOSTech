@@ -7,22 +7,58 @@
 
 import UIKit
 import WebKit
+import Combine
+
+struct User: Codable {
+	let id: Int
+	let login: String
+	let avatar_url: String
+}
 
 class ViewController: UIViewController {
 
     @IBOutlet weak var wkWebView: WKWebView!
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
+    var loadURLCancellable: AnyCancellable?
+    
+    var loadURL: URL? {
         var components = URLComponents()
         components.port = 8080
         components.host = "localhost"
         components.path = "/users"
         components.scheme = "http"
-        _ = components.url.map { url in
+        
+        return components.url
+	}
+	
+	override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        _ = self.loadURL.map { url in
             wkWebView.load(URLRequest(url: url))
         }
+        
+		scheduleUsersLoad()
     }
+    
+	@IBAction func refresh(_ sender: Any) {
+		scheduleUsersLoad()
+	}
+	
+	fileprivate func scheduleUsersLoad() {
+		loadURLCancellable = self.loadURL.map {
+			URLSession.shared.dataTaskPublisher(for: $0)
+				.map { (data: Data, response: URLResponse) in
+					data
+				}.decode(type: [User].self, decoder: JSONDecoder())
+				.sink { [weak self] completion in
+					print("\(completion)")
+					self?.loadURLCancellable = nil
+				} receiveValue: {
+					print("\($0[0])")
+				}
+		}
+	}
 }
+
 

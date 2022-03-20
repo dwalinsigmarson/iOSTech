@@ -18,13 +18,11 @@ class ViewController: UIViewController {
         var components = URLComponents()
         components.port = 8080
         components.host = "localhost"
-        components.path = "/about"
+        components.path = "/users"
         components.scheme = "http"
         _ = components.url.map { url in
             wkWebView.load(URLRequest(url: url))
         }
     }
-
-
 }
 

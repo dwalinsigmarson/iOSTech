@@ -34,21 +34,34 @@ public struct FibonacchiPublisher: Publisher {
         func request(_ demand: Subscribers.Demand) {
 			guard var amount = (demand > self.limit ? self.limit : demand).max else {
 				subscriber?.receive(completion: .finished)
+//				subscriber = nil
 				return
 			}
 			
 			while let subscriber = self.subscriber, amount > 0 {
 				let now = current + previous
-				let newDemand = subscriber.receive(current)
+				let newDemand = subscriber.receive(now)
 				Swift.print("\(newDemand)")
 				previous = current
 				current = now
 				amount -= 1
+			}
+			
+			if demand < self.limit {
+				self.limit -= demand
+			} else {
+				subscriber?.receive(completion: .finished)
+//				subscriber = nil
 			}
         }
         
         func cancel() {
             self.subscriber = nil
         }
+        
+        deinit {
+			Swift.print("deinit")
+		}
+        
     }
 }

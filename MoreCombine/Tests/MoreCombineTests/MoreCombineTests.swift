@@ -7,9 +7,9 @@ final class MoreCombineTests: XCTestCase {
 	var cancellable: AnyCancellable?
 	
 	func testWithUnlimitedSubscriber() throws {
-	
 		var comleted = false
 		var data = [Int]()
+
 		cancellable = FibonacchiPublisher(limit: Subscribers.Demand.max(7)).sink { completion in
 			XCTAssert(completion == .finished)
 			comleted = true
@@ -18,7 +18,24 @@ final class MoreCombineTests: XCTestCase {
 		}
 		
 		XCTAssertTrue(comleted)
-		XCTAssertEqual(data, [1, 1, 2, 3, 5, 8, 13])
-		cancellable = nil
+		XCTAssertEqual(data, [1, 2, 3, 5, 8, 13, 21])
+	}
+	
+	func testWithSubscriberLimitation() {
+		var comleted = false
+		var data = [Int]()
+	
+		cancellable = FibonacchiPublisher(limit: Subscribers.Demand.max(7))
+		.prefix(5)
+		.sink { [weak self] completion in
+			XCTAssert(completion == .finished)
+			comleted = true
+			self?.cancellable = nil
+		} receiveValue: {
+			data.append($0)
+		}
+
+		XCTAssertEqual(data, [1, 2, 3, 5, 8])
+		XCTAssertTrue(comleted)
 	}
 }

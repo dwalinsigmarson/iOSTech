@@ -27,7 +27,7 @@ public struct DataServer {
             Bundle.module.url(forResource: "users", withExtension: "json")
                 .flatMap { try? Data(contentsOf: $0) }
                 .map {
-                    HttpResponse.ok(HttpResponseBody.data($0, contentType: "application/json"))
+                    .ok(.data($0, contentType: "application/json"))
                 } ?? .notFound
         }
         

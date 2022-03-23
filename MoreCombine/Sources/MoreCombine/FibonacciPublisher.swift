@@ -40,8 +40,7 @@ public struct FibonacchiPublisher: Publisher {
 			
 			while let subscriber = self.subscriber, amount > 0 {
 				let now = current + previous
-				let newDemand = subscriber.receive(now)
-				Swift.print("\(newDemand)")
+				_ = subscriber.receive(now)
 				previous = current
 				current = now
 				amount -= 1

@@ -1,3 +1,10 @@
+//
+//  FibonacchiPublisher.swift
+//
+//
+//  Created by Dmitriy Davidenko on 3/20/22.
+//
+
 import Combine
 
 @available(iOS 13.0, *)

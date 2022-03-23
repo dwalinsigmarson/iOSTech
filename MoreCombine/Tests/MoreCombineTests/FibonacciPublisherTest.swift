@@ -38,4 +38,10 @@ final class MoreCombineTests: XCTestCase {
 		XCTAssertEqual(data, [1, 2, 3, 5, 8])
 		XCTAssertTrue(comleted)
 	}
+	
+	func testSubscriber() {
+		let sub = BackPressureSubscriber()
+		
+		XCTAssertNotNil(sub)
+	}
 }

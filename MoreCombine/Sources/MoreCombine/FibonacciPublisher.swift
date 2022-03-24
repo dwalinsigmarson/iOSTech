@@ -68,6 +68,5 @@ public struct FibonacchiPublisher: Publisher {
         deinit {
 			Swift.print("deinit")
 		}
-        
-    }
+	}
 }

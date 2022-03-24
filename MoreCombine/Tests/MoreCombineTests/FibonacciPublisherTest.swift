@@ -40,8 +40,15 @@ final class MoreCombineTests: XCTestCase {
 	}
 	
 	func testSubscriber() {
-		let sub = BackPressureSubscriber()
-		
-		XCTAssertNotNil(sub)
+		var comleted = false
+		var data = [Int]()
+
+		cancellable = FibonacchiPublisher(limit: Subscribers.Demand.max(7))
+			.backPressureSink(bufferSize: 2, receiveCompletion: {
+				print("\($0)")
+			}, receiveValue: {
+				print("\($0)")
+			})
+//		XCTAssertNotNil(sub)
 	}
 }

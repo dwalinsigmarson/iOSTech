@@ -6,8 +6,9 @@
 //
 
 import Combine
+import Foundation
 
-@available(iOS 13.0, *)
+@available(iOS 13.0, macOS 10.15, *)
 public struct FibonacchiPublisher: Publisher {
 	
 	public typealias Output = Int
@@ -39,26 +40,40 @@ public struct FibonacchiPublisher: Publisher {
         }
         
         func request(_ demand: Subscribers.Demand) {
-			guard var amount = (demand > self.limit ? self.limit : demand).max else {
+			guard var requestedAmount = Swift.min(demand, self.limit).max else {
 				subscriber?.receive(completion: .finished)
 //				subscriber = nil
 				return
 			}
 			
-			while let subscriber = self.subscriber, amount > 0 {
+			var sent = 0
+			while let subscriber = self.subscriber, sent < requestedAmount {
 				let now = current + previous
-				_ = subscriber.receive(now)
+				
+				let moreDemand = subscriber.receive(now)
+				sent += 1
+				
+				if let moreDemandCount = moreDemand.max {
+					if let limit = self.limit.max {
+						requestedAmount = Swift.min(moreDemandCount + requestedAmount, limit)
+					} else {
+						requestedAmount += moreDemandCount
+					}
+				} else if let maxLimit = self.limit.max {
+					requestedAmount = maxLimit
+				} else {
+					// Neither local nor external limits
+					subscriber.receive(completion: .finished)
+	//				subscriber = nil
+					return
+				}
+				
 				previous = current
 				current = now
-				amount -= 1
 			}
-			
-			if demand < self.limit {
-				self.limit -= demand
-			} else {
-				subscriber?.receive(completion: .finished)
-//				subscriber = nil
-			}
+
+			subscriber?.receive(completion: .finished)
+//			subscriber = nil
         }
         
         func cancel() {

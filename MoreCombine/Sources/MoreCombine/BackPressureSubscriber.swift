@@ -7,7 +7,7 @@
 
 import Combine
 
-@available(iOS 13.0, *)
+@available(iOS 13.0, macOS 10.15, *)
 class BackPressureSubscriber<T, E: Error>: Subscriber, Cancellable {
 	typealias Input = T
 	typealias Failure = E
@@ -37,8 +37,14 @@ class BackPressureSubscriber<T, E: Error>: Subscriber, Cancellable {
 	}
 	
 	func receive(_ input: T) -> Subscribers.Demand {
+		guard bufferSize > 1 else {
+			self.valueBlock(input)
+			return .max(1)
+		}
+		
+		buffer.append(input)
+		
 		if buffer.count < bufferSize {
-			buffer.append(input)
 			return .none
 		} else {
 			buffer.forEach { self.valueBlock($0) }
@@ -56,7 +62,7 @@ class BackPressureSubscriber<T, E: Error>: Subscriber, Cancellable {
 	}
 }
 
-@available(iOS 13.0, *)
+@available(iOS 13.0, macOS 10.15, *)
 extension Publisher {
 	func backPressureSink<T, E>(bufferSize: Int, receiveCompletion: @escaping BackPressureSubscriber<T, E>.CompletionBlock, receiveValue: @escaping BackPressureSubscriber<T, E>.ValueBlock) -> AnyCancellable where Self.Output == T, Self.Failure == E {
 		

@@ -43,12 +43,16 @@ final class MoreCombineTests: XCTestCase {
 		var comleted = false
 		var data = [Int]()
 
-		cancellable = FibonacchiPublisher(limit: Subscribers.Demand.max(7))
-			.backPressureSink(bufferSize: 2, receiveCompletion: {
-				print("\($0)")
+		cancellable = FibonacchiPublisher(limit: Subscribers.Demand.max(6))
+			.backPressureSink(bufferSize: 2, receiveCompletion: { [weak self] completion in
+				XCTAssert(completion == .finished)
+				comleted = true
+				self?.cancellable = nil
 			}, receiveValue: {
-				print("\($0)")
+				data.append($0)
 			})
-//		XCTAssertNotNil(sub)
+			
+		XCTAssertTrue(comleted)
+		XCTAssertEqual(data, [1, 2, 3, 5, 8, 13])
 	}
 }

@@ -64,7 +64,7 @@ public struct FibonacchiPublisher: Publisher {
 				} else {
 					// Neither local nor external limits
 					subscriber.receive(completion: .finished)
-	//				subscriber = nil
+//					self.subscriber = nil
 					return
 				}
 				

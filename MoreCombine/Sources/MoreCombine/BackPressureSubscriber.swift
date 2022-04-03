@@ -60,10 +60,16 @@ class BackPressureSubscriber<T, E: Error>: Subscriber, Cancellable {
 		}
 		
 		self.completionBlock(completion)
+		self.subscription = nil
 	}
 	
 	func cancel() {
 		self.subscription?.cancel()
+		self.subscription = nil
+	}
+	
+	deinit {
+		Swift.print("deinit subscriber")	
 	}
 }
 

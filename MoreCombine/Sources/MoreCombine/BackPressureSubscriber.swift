@@ -78,7 +78,10 @@ extension Publisher {
 	func backPressureSink<T, E>(bufferSize: Int, receiveCompletion: @escaping BackPressureSubscriber<T, E>.CompletionBlock, receiveValue: @escaping BackPressureSubscriber<T, E>.ValueBlock) -> AnyCancellable where Self.Output == T, Self.Failure == E {
 		
 		let subscriber = BackPressureSubscriber(bufferSize: bufferSize, receiveCompletion: receiveCompletion, receiveValue: receiveValue)
-		self.receive(subscriber: subscriber)
+		
+		// According to documentation, we should call subscribe instead of
+		// direct call to receive(subscriber:)
+		self.subscribe(subscriber)
 		
 		return AnyCancellable(subscriber)
 	}

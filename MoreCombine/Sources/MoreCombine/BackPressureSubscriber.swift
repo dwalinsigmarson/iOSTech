@@ -54,6 +54,11 @@ class BackPressureSubscriber<T, E: Error>: Subscriber, Cancellable {
 	}
 	
 	func receive(completion: Subscribers.Completion<E>) {
+		if buffer.count > 0 {
+			buffer.forEach { self.valueBlock($0) }
+			buffer.removeAll()
+		}
+		
 		self.completionBlock(completion)
 	}
 	

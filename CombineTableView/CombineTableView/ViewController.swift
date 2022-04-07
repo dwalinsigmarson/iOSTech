@@ -37,7 +37,7 @@ class ViewController: UIViewController {
         _ = self.loadURL.map { url in
             wkWebView.load(URLRequest(url: url))
         }
-        
+
 		scheduleUsersLoad()
     }
     
@@ -48,17 +48,14 @@ class ViewController: UIViewController {
 	fileprivate func scheduleUsersLoad() {
 		loadURLCancellable = self.loadURL.map {
 			URLSession.shared.dataTaskPublisher(for: $0)
-				.map { (data: Data, response: URLResponse) in
-					data
-				}.decode(type: [User].self, decoder: JSONDecoder())
-				.sink { [weak self] completion in
-					print("\(completion)")
-					self?.loadURLCancellable = nil
-				} receiveValue: {
-					print("\($0[0])")
-				}
+		}?.map { (data: Data, response: URLResponse) in
+			data
+		}.decode(type: [User].self, decoder: JSONDecoder())
+		.sink { [weak self] completion in
+			print("\(completion)")
+			self?.loadURLCancellable = nil
+		} receiveValue: {
+			print("\($0[0])")
 		}
 	}
 }
-
-

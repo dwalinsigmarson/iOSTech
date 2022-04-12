@@ -15,6 +15,7 @@
 		DE6AA21127E661A600F7EEA0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DE6AA20F27E661A600F7EEA0 /* LaunchScreen.storyboard */; };
 		DE6AA21A27E661BD00F7EEA0 /* DataServer in Frameworks */ = {isa = PBXBuildFile; productRef = DE6AA21927E661BD00F7EEA0 /* DataServer */; };
 		DE6AA21C27E663AD00F7EEA0 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE6AA21B27E663AD00F7EEA0 /* WebKit.framework */; };
+		DEE806FE2804C82D00D63960 /* UsersListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEE806FD2804C82D00D63960 /* UsersListViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +28,7 @@
 		DE6AA21027E661A600F7EEA0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		DE6AA21227E661A600F7EEA0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DE6AA21B27E663AD00F7EEA0 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		DEE806FD2804C82D00D63960 /* UsersListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsersListViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +67,7 @@
 				DE6AA20427E661A400F7EEA0 /* AppDelegate.swift */,
 				DE6AA20627E661A400F7EEA0 /* SceneDelegate.swift */,
 				DE6AA20827E661A400F7EEA0 /* ViewController.swift */,
+				DEE806FD2804C82D00D63960 /* UsersListViewController.swift */,
 				DE6AA20A27E661A400F7EEA0 /* Main.storyboard */,
 				DE6AA20D27E661A600F7EEA0 /* Assets.xcassets */,
 				DE6AA20F27E661A600F7EEA0 /* LaunchScreen.storyboard */,
@@ -156,6 +159,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DE6AA20927E661A400F7EEA0 /* ViewController.swift in Sources */,
+				DEE806FE2804C82D00D63960 /* UsersListViewController.swift in Sources */,
 				DE6AA20527E661A400F7EEA0 /* AppDelegate.swift in Sources */,
 				DE6AA20727E661A400F7EEA0 /* SceneDelegate.swift in Sources */,
 			);

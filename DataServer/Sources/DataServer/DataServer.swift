@@ -1,8 +1,26 @@
 import Swifter
 import Foundation
 
-public struct DataServer {
+struct User: Codable {
+	let id: Int
+	let login: String
+	let avatar_url: String
+}
+
+public class DataServer {
 	let server: HttpServer
+	
+	lazy var usersData = Bundle.module.url(forResource: "users", withExtension: "json")
+		.flatMap { try? Data(contentsOf: $0) }
+		.flatMap {
+			try? JSONDecoder().decode([User].self, from: $0)
+		}
+		
+	lazy var usersMap =	usersData?.reduce(into: [Int: User](), { partialResult, user in
+			partialResult[user.id] = user
+		}) ?? [:]
+
+	lazy var userIDs = usersData?.map { $0.id } ?? []
 	
     public init() {
 		server = HttpServer()
@@ -10,27 +28,27 @@ public struct DataServer {
 
 	public func start() {
 		server["/about"] = scopes {
-            html {
-                body {
-                    h1 {
-                        inner = "People provider"
-                    }
-                }
-            }
-        }
-        
-        server["/test"] = {
+			html {
+				body {
+					h1 {
+						inner = "People provider"
+					}
+				}
+			}
+		}
+
+		server["/test"] = {
 			.ok(.htmlBody("<h1>You asked for " + $0.path + "</h1>"))
 		}
-        
-        server["/users"] = { _ in
-            Bundle.module.url(forResource: "users", withExtension: "json")
-                .flatMap { try? Data(contentsOf: $0) }
-                .map {
-                    .ok(.data($0, contentType: "application/json"))
-                } ?? .notFound
-        }
-        
-        try? server.start(8080, forceIPv4: false, priority: .background)
+
+		server["/users"] = { _ in
+			let userIDsData = try? JSONEncoder().encode(self.userIDs)
+			
+			return userIDsData.map {
+				.ok(.data($0, contentType: "application/json"))
+			} ?? .notFound
+		}
+
+		try? server.start(8080, forceIPv4: false, priority: .background)
 	}
 }

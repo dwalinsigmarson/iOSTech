@@ -53,6 +53,21 @@ public class DataServer {
 			} ?? .notFound
 		}
 
+		let userIDPath = ":path"
+		server["/users/\(userIDPath)"] = { request in
+			return request.params[userIDPath]
+				.flatMap { Int($0) }
+				.flatMap {
+					self.usersMap[$0]
+				}
+				.flatMap {
+					try? JSONEncoder().encode($0)
+				}
+				.map {
+					.ok(.data($0, contentType: "application/json"))
+				} ?? .notFound
+		}
+		
 		try? server.start(8080, forceIPv4: false, priority: .background)
 	}
 }

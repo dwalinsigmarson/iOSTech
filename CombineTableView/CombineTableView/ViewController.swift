@@ -29,7 +29,7 @@ class ViewController: UIViewController {
         var components = URLComponents()
         components.port = 8080
         components.host = "localhost"
-        components.path = "/users"
+        components.path = "/users/103"
         components.scheme = "http"
         
         return components.url
@@ -54,12 +54,12 @@ class ViewController: UIViewController {
 			URLSession.shared.dataTaskPublisher(for: $0)
 		}?.map { (data: Data, response: URLResponse) in
 			data
-		}.decode(type: [UserID].self, decoder: JSONDecoder())
+		}.decode(type: User.self, decoder: JSONDecoder())
 		.sink { [weak self] completion in
 			print("\(completion)")
 			self?.loadURLCancellable = nil
 		} receiveValue: {
-			print("\($0[0])")
+			print("\($0)")
 		}
 	}
 }

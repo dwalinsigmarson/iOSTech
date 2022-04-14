@@ -15,6 +15,10 @@ struct User: Codable {
 	let avatar_url: String
 }
 
+struct UserID: Codable {
+	let id: Int
+}
+
 class ViewController: UIViewController {
 
     @IBOutlet weak var wkWebView: WKWebView!
@@ -50,7 +54,7 @@ class ViewController: UIViewController {
 			URLSession.shared.dataTaskPublisher(for: $0)
 		}?.map { (data: Data, response: URLResponse) in
 			data
-		}.decode(type: [User].self, decoder: JSONDecoder())
+		}.decode(type: [UserID].self, decoder: JSONDecoder())
 		.sink { [weak self] completion in
 			print("\(completion)")
 			self?.loadURLCancellable = nil

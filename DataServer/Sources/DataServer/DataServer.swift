@@ -7,6 +7,10 @@ struct User: Codable {
 	let avatar_url: String
 }
 
+struct UserID: Codable {
+	let id: Int
+}
+
 public class DataServer {
 	let server: HttpServer
 	
@@ -20,7 +24,7 @@ public class DataServer {
 			partialResult[user.id] = user
 		}) ?? [:]
 
-	lazy var userIDs = usersData?.map { $0.id } ?? []
+	lazy var userIDs = usersData?.map { UserID(id: $0.id) } ?? []
 	
     public init() {
 		server = HttpServer()

@@ -57,12 +57,8 @@ public class DataServer {
 		server["/users/\(userIDPath)"] = { request in
 			return request.params[userIDPath]
 				.flatMap { Int($0) }
-				.flatMap {
-					self.usersMap[$0]
-				}
-				.flatMap {
-					try? JSONEncoder().encode($0)
-				}
+				.flatMap { self.usersMap[$0] }
+				.flatMap { try? JSONEncoder().encode($0) }
 				.map {
 					.ok(.data($0, contentType: "application/json"))
 				} ?? .notFound

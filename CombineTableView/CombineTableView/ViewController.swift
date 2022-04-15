@@ -9,16 +9,6 @@ import UIKit
 import WebKit
 import Combine
 
-struct User: Codable {
-	let id: Int
-	let login: String
-	let avatar_url: String
-}
-
-struct UserID: Codable {
-	let id: Int
-}
-
 class ViewController: UIViewController {
 
     @IBOutlet weak var wkWebView: WKWebView!

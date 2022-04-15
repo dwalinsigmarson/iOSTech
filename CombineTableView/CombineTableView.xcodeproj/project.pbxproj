@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DE09212C280A06700013A23E /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE09212B280A06700013A23E /* User.swift */; };
 		DE6AA20527E661A400F7EEA0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE6AA20427E661A400F7EEA0 /* AppDelegate.swift */; };
 		DE6AA20727E661A400F7EEA0 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE6AA20627E661A400F7EEA0 /* SceneDelegate.swift */; };
 		DE6AA20927E661A400F7EEA0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE6AA20827E661A400F7EEA0 /* ViewController.swift */; };
@@ -19,6 +20,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DE09212B280A06700013A23E /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		DE6AA20127E661A400F7EEA0 /* CombineTableView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CombineTableView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE6AA20427E661A400F7EEA0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DE6AA20627E661A400F7EEA0 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -44,6 +46,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DE09212A280A06510013A23E /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				DE09212B280A06700013A23E /* User.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		DE6AA1F827E661A400F7EEA0 = {
 			isa = PBXGroup;
 			children = (
@@ -64,6 +74,7 @@
 		DE6AA20327E661A400F7EEA0 /* CombineTableView */ = {
 			isa = PBXGroup;
 			children = (
+				DE09212A280A06510013A23E /* Model */,
 				DE6AA20427E661A400F7EEA0 /* AppDelegate.swift */,
 				DE6AA20627E661A400F7EEA0 /* SceneDelegate.swift */,
 				DE6AA20827E661A400F7EEA0 /* ViewController.swift */,
@@ -161,6 +172,7 @@
 				DE6AA20927E661A400F7EEA0 /* ViewController.swift in Sources */,
 				DEE806FE2804C82D00D63960 /* UsersListViewController.swift in Sources */,
 				DE6AA20527E661A400F7EEA0 /* AppDelegate.swift in Sources */,
+				DE09212C280A06700013A23E /* User.swift in Sources */,
 				DE6AA20727E661A400F7EEA0 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

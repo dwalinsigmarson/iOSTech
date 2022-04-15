@@ -6,12 +6,35 @@
 //
 
 import UIKit
+import Combine
 
 class UsersListViewController: UITableViewController {
 
+    lazy var usersIDURL: URL? = {
+        var components = URLComponents()
+        components.port = 8080
+        components.host = "localhost"
+        components.path = "/users"
+        components.scheme = "http"
+        
+        return components.url
+	}()
+
+	var userIDsCancellable: AnyCancellable?
+	
+	// URLSession.shared.dataTaskPublisher(for: usersIDURL)
+	
     override func viewDidLoad() {
         super.viewDidLoad()
 
+		var usersIDsStream = self.usersIDURL.map {
+			URLSession.shared.dataTaskPublisher(for: $0)
+		}?.map { (data: Data, response: URLResponse) in
+			data
+		}.decode(type: [UserID].self, decoder: JSONDecoder())
+		.prepend([UserID]())
+		.share()
+		
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 

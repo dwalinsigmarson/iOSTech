@@ -22,19 +22,28 @@ class UsersListViewController: UITableViewController {
 
 	var userIDsCancellable: AnyCancellable?
 	
-	// URLSession.shared.dataTaskPublisher(for: usersIDURL)
+	var userIDsCount = 0
 	
     override func viewDidLoad() {
         super.viewDidLoad()
 
-		var usersIDsStream = self.usersIDURL.map {
+		let usersIDsStream = self.usersIDURL.map {
 			URLSession.shared.dataTaskPublisher(for: $0)
 		}?.map { (data: Data, response: URLResponse) in
 			data
 		}.decode(type: [UserID].self, decoder: JSONDecoder())
+		.receive(on: DispatchQueue.main)
 		.prepend([UserID]())
+		.eraseToAnyPublisher()
 		.share()
 		
+		userIDsCancellable = usersIDsStream?.sink(
+		receiveCompletion: { [weak self] completion in
+			self?.userIDsCancellable = nil
+		}, receiveValue: { [weak self] userIDs in
+			self?.userIDsCount = userIDs.count
+			self?.tableView.reloadData()
+		})
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -111,3 +120,22 @@ class UsersListViewController: UITableViewController {
     */
 
 }
+
+
+//struct User: Codable {
+//    let name: String
+//    let userID: String
+//}
+//let url = URL(string: "https://example.com/endpoint")!
+//cancellable = urlSession
+//    .dataTaskPublisher(for: url)
+//    .tryMap() { element -> Data in
+//        guard let httpResponse = element.response as? HTTPURLResponse,
+//            httpResponse.statusCode == 200 else {
+//                throw URLError(.badServerResponse)
+//            }
+//        return element.data
+//        }
+//    .decode(type: User.self, decoder: JSONDecoder())
+//    .sink(receiveCompletion: { print ("Received completion: \($0).") },
+//          receiveValue: { user in print ("Received user: \(user).")})

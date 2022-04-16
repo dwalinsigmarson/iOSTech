@@ -20,11 +20,10 @@ class UsersListViewController: UITableViewController {
         return components.url
 	}()
 
-	var cellsLoadSubject = PassthroughSubject<IndexPath, Never>()
+	var loadCellSubject = PassthroughSubject<(IndexPath, UITableViewCell), Never>()
 	
 	var userIDsCountCancellable: AnyCancellable?
-	var userIDsCancellable: AnyCancellable?
-	var reloadTableCancellable: AnyCancellable?
+	var cellLoadCancellable: AnyCancellable?
 	
 	var userIDsCount = 0
 	
@@ -48,14 +47,15 @@ class UsersListViewController: UITableViewController {
 			self?.tableView.reloadData()
 		}
 
-//		userIDsCountCancellable = usersIDsStream?.map(\.count).sink(
-//		receiveCompletion: { [weak self] completion in
-//			self?.userIDsCountCancellable = nil
-//		}, receiveValue: { [weak self] count in
-//			self?.userIDsCount = count
-//			self?.tableView.reloadData()
-//		})
-		
+		cellLoadCancellable = usersIDsStream?.combineLatest(loadCellSubject)
+			.sink { (userIDs, cellData) in
+				let (indexPath, cell) = cellData
+				var content = cell.defaultContentConfiguration()
+				let title = "\(userIDs[indexPath.row])"
+				content.text = title
+				cell.contentConfiguration = content
+			}
+
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -79,10 +79,10 @@ class UsersListViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "userCell", for: indexPath)
 
 		var content = cell.defaultContentConfiguration()
-		content.text = "\(indexPath.row)"
-        // Configure the cell...
+		content.text = "Loading..."
         cell.contentConfiguration = content
 
+		loadCellSubject.send((indexPath, cell))
         return cell
     }
 

@@ -20,19 +20,16 @@ class UsersListViewController: UITableViewController {
         return components.url
 	}()
 
+	var cellsLoadSubject = PassthroughSubject<IndexPath, Never>()
+	
 	var userIDsCountCancellable: AnyCancellable?
 	var userIDsCancellable: AnyCancellable?
+	var reloadTableCancellable: AnyCancellable?
 	
 	var userIDsCount = 0
 	
     override func viewDidLoad() {
         super.viewDidLoad()
-
-//		let stream = URLSession.shared.dataTaskPublisher(for: usersIDURL!)
-//			.map { (data: Data, response: URLResponse) in
-//				data
-//			}.decode(type: [UserID].self, decoder: JSONDecoder()).
-//
 
 		let usersIDsStream = self.usersIDURL.map {
 			URLSession.shared.dataTaskPublisher(for: $0)
@@ -46,8 +43,11 @@ class UsersListViewController: UITableViewController {
 			.share()
 		}
 		
-		userIDsCountCancellable = usersIDsStream?.map(\.count).assign(to: \.userIDsCount, on: self)
-		
+		userIDsCountCancellable = usersIDsStream?.map(\.count).sink { [weak self] count in
+			self?.userIDsCount = count
+			self?.tableView.reloadData()
+		}
+
 //		userIDsCountCancellable = usersIDsStream?.map(\.count).sink(
 //		receiveCompletion: { [weak self] completion in
 //			self?.userIDsCountCancellable = nil
@@ -72,7 +72,7 @@ class UsersListViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 30
+        return self.userIDsCount
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

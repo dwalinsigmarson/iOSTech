@@ -20,6 +20,7 @@ class UsersListViewController: UITableViewController {
         return components.url
 	}()
 
+	var userIDsCountCancellable: AnyCancellable?
 	var userIDsCancellable: AnyCancellable?
 	
 	var userIDsCount = 0
@@ -27,23 +28,34 @@ class UsersListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+//		let stream = URLSession.shared.dataTaskPublisher(for: usersIDURL!)
+//			.map { (data: Data, response: URLResponse) in
+//				data
+//			}.decode(type: [UserID].self, decoder: JSONDecoder()).
+//
+
 		let usersIDsStream = self.usersIDURL.map {
 			URLSession.shared.dataTaskPublisher(for: $0)
-		}?.map { (data: Data, response: URLResponse) in
-			data
-		}.decode(type: [UserID].self, decoder: JSONDecoder())
-		.receive(on: DispatchQueue.main)
-		.prepend([UserID]())
-		.eraseToAnyPublisher()
-		.share()
+			.map { (data: Data, response: URLResponse) in
+				data
+			}.decode(type: [UserID].self, decoder: JSONDecoder())
+			.replaceError(with: [UserID]())
+			.receive(on: DispatchQueue.main)
+			.prepend([UserID]())
+			.eraseToAnyPublisher()
+			.share()
+		}
 		
-		userIDsCancellable = usersIDsStream?.sink(
-		receiveCompletion: { [weak self] completion in
-			self?.userIDsCancellable = nil
-		}, receiveValue: { [weak self] userIDs in
-			self?.userIDsCount = userIDs.count
-			self?.tableView.reloadData()
-		})
+		userIDsCountCancellable = usersIDsStream?.map(\.count).assign(to: \.userIDsCount, on: self)
+		
+//		userIDsCountCancellable = usersIDsStream?.map(\.count).sink(
+//		receiveCompletion: { [weak self] completion in
+//			self?.userIDsCountCancellable = nil
+//		}, receiveValue: { [weak self] count in
+//			self?.userIDsCount = count
+//			self?.tableView.reloadData()
+//		})
+		
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 

@@ -30,7 +30,7 @@ class UsersListViewController: UITableViewController {
         return components.url
 	}
 
-	lazy var userPlaceholder = User(id: 0, login: "Placeholder", avatar_url: "")
+	static var userPlaceholder = User(id: 0, login: "Placeholder", avatar_url: "")
 	
 	var loadCellSubject = PassthroughSubject<(IndexPath, UITableViewCell), Never>()
 	
@@ -69,28 +69,44 @@ class UsersListViewController: UITableViewController {
 				let (indexPath, _) = cellData
 				guard let url = strongSelf.userDataURL(id: userIDs[indexPath.row].id) else { return nil }
 				return (url, indexPath)
-			}.compactMap { [weak self] (url, indexPath) -> (AnyCancellable, IndexPath) in
-				let loadUserDataCancellable = URLSession.shared.dataTaskPublisher(for: url)
-				.map { (data: Data, response: URLResponse) in
+			}.flatMap { (url, indexPath) in
+				URLSession.shared.dataTaskPublisher(for: url).map { (data: Data, response: URLResponse) in
 					data
 				}.decode(type: User.self, decoder: JSONDecoder())
-				.receive(on: DispatchQueue.main)
-				.eraseToAnyPublisher()
-				.sink { [weak self] _ in
-					self?.loadUserDataCancellables.removeValue(forKey: indexPath)
-				} receiveValue: { [weak self] user in
-					guard let cell = self?.tableView.cellForRow(at: indexPath) else { return }
+				.replaceError(with: Self.userPlaceholder)
+				.map { ($0, indexPath) }
+			}.receive(on: DispatchQueue.main)
+			.sink { [weak self] (user, indexPath) in
+				guard let cell = self?.tableView.cellForRow(at: indexPath) else { return }
 
-					var content = cell.defaultContentConfiguration()
-					let title = user.login
-					content.text = title
-					cell.contentConfiguration = content
-				}
-
-				return (loadUserDataCancellable, indexPath)
-			}.sink { [weak self] (loadUserDataCancellable, indexPath) in
-				self?.loadUserDataCancellables[indexPath] = loadUserDataCancellable
+				var content = cell.defaultContentConfiguration()
+				let title = user.login
+				content.text = title
+				cell.contentConfiguration = content
 			}
+			
+//			.compactMap { [weak self] (url, indexPath) -> (AnyCancellable, IndexPath) in
+//				let loadUserDataCancellable = URLSession.shared.dataTaskPublisher(for: url)
+//				.map { (data: Data, response: URLResponse) in
+//					data
+//				}.decode(type: User.self, decoder: JSONDecoder())
+//				.receive(on: DispatchQueue.main)
+//				.eraseToAnyPublisher()
+//				.sink { [weak self] _ in
+//					self?.loadUserDataCancellables.removeValue(forKey: indexPath)
+//				} receiveValue: { [weak self] user in
+//					guard let cell = self?.tableView.cellForRow(at: indexPath) else { return }
+//
+//					var content = cell.defaultContentConfiguration()
+//					let title = user.login
+//					content.text = title
+//					cell.contentConfiguration = content
+//				}
+//
+//				return (loadUserDataCancellable, indexPath)
+//			}.sink { [weak self] (loadUserDataCancellable, indexPath) in
+//				self?.loadUserDataCancellables[indexPath] = loadUserDataCancellable
+//			}
 
 //		cellLoadCancellable = usersIDsStream?.combineLatest(loadCellSubject)
 //			.sink { (userIDs, cellData) in

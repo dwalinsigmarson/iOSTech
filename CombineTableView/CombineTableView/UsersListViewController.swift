@@ -20,12 +20,26 @@ class UsersListViewController: UITableViewController {
         return components.url
 	}()
 
+	func userDataURL(id: Int) -> URL? {
+        var components = URLComponents()
+        components.port = 8080
+        components.host = "localhost"
+        components.path = "/users/\(id)"
+        components.scheme = "http"
+        
+        return components.url
+	}
+
+	lazy var userPlaceholder = User(id: 0, login: "Placeholder", avatar_url: "")
+	
 	var loadCellSubject = PassthroughSubject<(IndexPath, UITableViewCell), Never>()
 	
 	var userIDsCountCancellable: AnyCancellable?
 	var cellLoadCancellable: AnyCancellable?
 	
 	var userIDsCount = 0
+	
+	var loadUserDataCancellables = [IndexPath: AnyCancellable]()
 	
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,14 +61,45 @@ class UsersListViewController: UITableViewController {
 			self?.tableView.reloadData()
 		}
 
-		cellLoadCancellable = usersIDsStream?.combineLatest(loadCellSubject)
-			.sink { (userIDs, cellData) in
-				let (indexPath, cell) = cellData
-				var content = cell.defaultContentConfiguration()
-				let title = "\(userIDs[indexPath.row])"
-				content.text = title
-				cell.contentConfiguration = content
+		cellLoadCancellable = usersIDsStream?
+			.combineLatest(loadCellSubject)
+			.compactMap { [weak self] (userIDs, cellData) -> (URL, IndexPath)? in
+				guard let strongSelf = self else { return nil }
+
+				let (indexPath, _) = cellData
+				guard let url = strongSelf.userDataURL(id: userIDs[indexPath.row].id) else { return nil }
+				return (url, indexPath)
+			}.compactMap { [weak self] (url, indexPath) -> (AnyCancellable, IndexPath) in
+				let loadUserDataCancellable = URLSession.shared.dataTaskPublisher(for: url)
+				.map { (data: Data, response: URLResponse) in
+					data
+				}.decode(type: User.self, decoder: JSONDecoder())
+				.receive(on: DispatchQueue.main)
+				.eraseToAnyPublisher()
+				.sink { [weak self] _ in
+					self?.loadUserDataCancellables.removeValue(forKey: indexPath)
+				} receiveValue: { [weak self] user in
+					guard let cell = self?.tableView.cellForRow(at: indexPath) else { return }
+
+					var content = cell.defaultContentConfiguration()
+					let title = user.login
+					content.text = title
+					cell.contentConfiguration = content
+				}
+
+				return (loadUserDataCancellable, indexPath)
+			}.sink { [weak self] (loadUserDataCancellable, indexPath) in
+				self?.loadUserDataCancellables[indexPath] = loadUserDataCancellable
 			}
+
+//		cellLoadCancellable = usersIDsStream?.combineLatest(loadCellSubject)
+//			.sink { (userIDs, cellData) in
+//				let (indexPath, cell) = cellData
+//				var content = cell.defaultContentConfiguration()
+//				let title = "\(userIDs[indexPath.row])"
+//				content.text = title
+//				cell.contentConfiguration = content
+//			}
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -132,22 +177,3 @@ class UsersListViewController: UITableViewController {
     */
 
 }
-
-
-//struct User: Codable {
-//    let name: String
-//    let userID: String
-//}
-//let url = URL(string: "https://example.com/endpoint")!
-//cancellable = urlSession
-//    .dataTaskPublisher(for: url)
-//    .tryMap() { element -> Data in
-//        guard let httpResponse = element.response as? HTTPURLResponse,
-//            httpResponse.statusCode == 200 else {
-//                throw URLError(.badServerResponse)
-//            }
-//        return element.data
-//        }
-//    .decode(type: User.self, decoder: JSONDecoder())
-//    .sink(receiveCompletion: { print ("Received completion: \($0).") },
-//          receiveValue: { user in print ("Received user: \(user).")})

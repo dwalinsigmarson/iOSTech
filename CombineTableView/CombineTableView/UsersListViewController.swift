@@ -33,9 +33,11 @@ class UsersListViewController: UITableViewController {
 	lazy var userPlaceholder = User(id: 0, login: "Placeholder", avatar_url: "")
 	
 	var loadCellSubject = PassthroughSubject<(IndexPath, UITableViewCell), Never>()
+	var stopLoadCellSubject = PassthroughSubject<(IndexPath, UITableViewCell), Never>()
 	
 	var userIDsCountCancellable: AnyCancellable?
 	var cellLoadCancellable: AnyCancellable?
+	var cellsStopLoadCancellable: AnyCancellable?
 	
 	var userIDsCount = 0
 	
@@ -70,6 +72,7 @@ class UsersListViewController: UITableViewController {
 				guard let url = strongSelf.userDataURL(id: userIDs[indexPath.row].id) else { return nil }
 				return (url, indexPath)
 			}.compactMap { [weak self] (url, indexPath) -> (AnyCancellable, IndexPath) in
+//				print("Requesting \(indexPath)")
 				let loadUserDataCancellable = URLSession.shared.dataTaskPublisher(for: url)
 				.map { (data: Data, response: URLResponse) in
 					data
@@ -78,6 +81,7 @@ class UsersListViewController: UITableViewController {
 				.eraseToAnyPublisher()
 				.sink { [weak self] _ in
 					self?.loadUserDataCancellables.removeValue(forKey: indexPath)
+//					print("Count \(self?.loadUserDataCancellables.count)")
 				} receiveValue: { [weak self] user in
 					guard let cell = self?.tableView.cellForRow(at: indexPath) else { return }
 
@@ -92,14 +96,11 @@ class UsersListViewController: UITableViewController {
 				self?.loadUserDataCancellables[indexPath] = loadUserDataCancellable
 			}
 
-//		cellLoadCancellable = usersIDsStream?.combineLatest(loadCellSubject)
-//			.sink { (userIDs, cellData) in
-//				let (indexPath, cell) = cellData
-//				var content = cell.defaultContentConfiguration()
-//				let title = "\(userIDs[indexPath.row])"
-//				content.text = title
-//				cell.contentConfiguration = content
-//			}
+		cellsStopLoadCancellable = stopLoadCellSubject.sink { [weak self] (indexPath, cell) in
+//			print("Cancelling \(indexPath)")
+			self?.loadUserDataCancellables.removeValue(forKey: indexPath)
+		}
+
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -131,6 +132,9 @@ class UsersListViewController: UITableViewController {
         return cell
     }
 
+	override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+		stopLoadCellSubject.send((indexPath, cell))
+	}
     /*
     // Override to support conditional editing of the table view.
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
